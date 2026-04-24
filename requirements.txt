@@ -1,3 +1,7 @@
 pymongo
 pandas
 streamlit
+networkx
+python-dotenv
+matplotlib
+plotly
