@@ -1,0 +1,16 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: white;
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+}
+
+main {
+    text-align: center;
+    background: #1f2937;
+    padding: 40px;
+    border-radius: 20px;
+}
