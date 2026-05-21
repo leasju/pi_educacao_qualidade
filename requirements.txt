@@ -7,3 +7,5 @@ matplotlib
 plotly
 numpy
 importnb
+flask
+gunicorn
