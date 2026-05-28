@@ -6,26 +6,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <main>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="news.asp">Filtragem</a></li>
-            <li><a href="about.asp">Chatbot</a></li>
-            <li><a href="about.asp">Sobre nós</a></li>
-            <li><a href="https://github.com/leasju/pi_educacao_qualidade">Github</a></li>
-        </ul>
-        <h1>EduStats</h1>
-        <p>Desigualdades Educacionais nos Municípios da Região Metropolitana de Campinas</p>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="news.asp">Filtragem</a></li>
+        <li><a href="about.asp">Chatbot</a></li>
+        <li><a href="about.asp">Sobre nós</a></li>
+        <li><a href="https://github.com/leasju/pi_educacao_qualidade">Github</a></li>
+    </ul>
+    <h1>EduStats</h1>
+    <p>Desigualdades Educacionais nos Municípios da Região Metropolitana de Campinas</p>
 
-        <div class="row">
-            <div class="column" style="background-color:#aaa;">Column</div>
-            <div class="column">{{ graph_html|safe }}</div>
-        </div>
+    <div class="row">
+        <div class="column" style="background-color:#aaa;">Column</div>
+        <div class="column">{{ graph_html|safe }}</div>
+    </div>
 
-        <div class="footer">
-            <p>Footer</p>
-        </div>
+    <div class="footer">
+        <p>Footer</p>
+    </div>
 
-    </main>
 </body>
 </html>

@@ -1,25 +1,18 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #111827;
+    background: #111111;
     color: white;
     display: grid;
     place-items: center;
     min-height: 100vh;
 }
 
-main {
-    text-align: center;
-    background: #1f2937;
-    padding: 150px;
-    border-radius: 20px;
-}
-
 ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
-  background-color: #333333;
+  background-color: #1C1C1E;
   display: flex;
 }
 
