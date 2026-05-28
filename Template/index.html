@@ -1,29 +1,1043 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>EduStats</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EduStats — Desigualdades Educacionais RMC</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #f5a623;
+    --accent-dim: rgba(245,166,35,0.12);
+    --text: #e8e8e8;
+    --text-muted: #888;
+    --text-dim: #555;
+    --radius: 8px;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,15,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 56px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .logo-icon svg { width: 16px; height: 16px; fill: #0f0f0f; }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    font-size: 13.5px;
+    transition: color .18s, background .18s;
+  }
+
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .btn-github {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--accent);
+    color: #0f0f0f !important;
+    font-weight: 600;
+    padding: 7px 14px !important;
+    border-radius: var(--radius);
+    font-size: 13px !important;
+  }
+
+  .btn-github:hover { opacity: .88; background: var(--accent) !important; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 72px 32px 64px;
+    max-width: 760px;
+    animation: fadeUp .5s ease both;
+  }
+
+  .hero h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.3;
+    margin-bottom: 18px;
+    color: #fff;
+  }
+
+  .hero p {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.75;
+    max-width: 580px;
+  }
+
+  .hero-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 20px;
+    color: var(--accent);
+    font-size: 13px;
+    font-family: var(--mono);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: opacity .18s;
+  }
+
+  .hero-link:hover { opacity: .75; }
+
+  /* ── FILTERS ── */
+  .filters-bar {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    animation: fadeUp .5s .1s ease both;
+  }
+
+  .filters-label {
+    color: var(--text-muted);
+    font-size: 12.5px;
+    margin-right: 4px;
+    white-space: nowrap;
+  }
+
+  .filter-select {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    font-family: var(--font);
+    font-size: 13px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: border-color .18s, color .18s;
+    white-space: nowrap;
+  }
+
+  .filter-btn:hover { border-color: #444; color: var(--text); }
+
+  .filter-btn .chevron {
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+
+  .btn-apply {
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: var(--radius);
+    padding: 7px 18px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: auto;
+    transition: opacity .18s;
+  }
+
+  .btn-apply:hover { opacity: .85; }
+
+  /* ── SECTION ── */
+  .section {
+    padding: 40px 32px;
+    animation: fadeUp .5s .15s ease both;
+  }
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    color: #fff;
+  }
+
+  .section-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+  }
+
+  /* ── CARDS GRID ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 680px) {
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color .2s, transform .2s;
+    cursor: pointer;
+  }
+
+  .card:hover {
+    border-color: #3a3a3a;
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    padding: 14px 16px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .card-title {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.01em;
+  }
+
+  .card-badge {
+    font-size: 10.5px;
+    font-family: var(--mono);
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .badge-grouped {
+    background: rgba(100,180,255,0.12);
+    color: #7bc4f8;
+    border: 1px solid rgba(100,180,255,0.2);
+  }
+
+  .badge-available {
+    background: rgba(80,200,120,0.1);
+    color: #6fdc96;
+    border: 1px solid rgba(80,200,120,0.2);
+  }
+
+  .badge-lines {
+    background: rgba(180,130,255,0.1);
+    color: #c59bfa;
+    border: 1px solid rgba(180,130,255,0.2);
+  }
+
+  /* Chart placeholder */
+  .card-chart {
+    flex: 1;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 16px;
+    position: relative;
+  }
+
+  .chart-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .chart-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+  }
+
+  /* Fake bar chart */
+  .bars-visual {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 60px;
+    width: 100%;
+    padding: 0 8px;
+    margin-bottom: 8px;
+  }
+
+  .bar {
+    flex: 1;
+    border-radius: 3px 3px 0 0;
+    opacity: .55;
+    transition: opacity .2s;
+  }
+
+  .card:hover .bar { opacity: .8; }
+
+  .bar-1 { background: #7bc4f8; height: 40%; }
+  .bar-2 { background: #7bc4f8; height: 70%; }
+  .bar-3 { background: #7bc4f8; height: 55%; }
+  .bar-4 { background: #7bc4f8; height: 85%; }
+  .bar-5 { background: #7bc4f8; height: 65%; }
+  .bar-6 { background: #7bc4f8; height: 50%; }
+
+  .bar-s1 { background: #6fdc96; height: 35%; }
+  .bar-s2 { background: #6fdc96; height: 60%; }
+  .bar-s3 { background: #6fdc96; height: 45%; }
+  .bar-s4 { background: #6fdc96; height: 75%; }
+  .bar-s5 { background: #6fdc96; height: 55%; }
+  .bar-s6 { background: #6fdc96; height: 30%; }
+
+  /* Dispersão / Scatter visual */
+  .scatter-visual {
+    width: 100%;
+    height: 70px;
+    position: relative;
+    margin-bottom: 8px;
+  }
+
+  .dot {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #c59bfa;
+    opacity: .6;
+  }
+
+  /* Line chart visual */
+  .line-visual {
+    width: 100%;
+    height: 60px;
+    position: relative;
+    margin-bottom: 8px;
+  }
+
+  .card-footer {
+    padding: 10px 16px 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-desc {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* ── SEPARATOR ── */
+  .separator {
+    height: 1px;
+    background: var(--border);
+    margin: 0 32px;
+  }
+
+  /* ── MUNICIPALITY SECTION ── */
+  .municipality-section {
+    padding: 40px 32px;
+    animation: fadeUp .5s .2s ease both;
+  }
+
+  .municipality-section .section-title { margin-bottom: 6px; }
+  .municipality-section .section-sub { margin-bottom: 28px; }
+
+  .municipality-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (max-width: 680px) {
+    .municipality-layout { grid-template-columns: 1fr; }
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .sidebar-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    cursor: pointer;
+    transition: color .15s;
+  }
+
+  .checkbox-item:hover { color: var(--text); }
+
+  .checkbox-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: border-color .15s, background .15s;
+  }
+
+  .checkbox-item input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checkbox-item input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 1px; left: 3px;
+    width: 5px; height: 8px;
+    border: 2px solid #0f0f0f;
+    border-top: none; border-left: none;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-label {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .sidebar-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
+
+  .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    cursor: pointer;
+  }
+
+  .radio-item input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: border-color .15s;
+  }
+
+  .radio-item input[type="radio"]:checked {
+    border-color: var(--accent);
+  }
+
+  .radio-item input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Main chart area */
+  .chart-main {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .chart-main-header {
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .chart-main-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .chart-main-link {
+    font-size: 11.5px;
+    font-family: var(--mono);
+    color: var(--accent);
+    text-decoration: none;
+    transition: opacity .15s;
+  }
+
+  .chart-main-link:hover { opacity: .7; }
+
+  .chart-main-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: 24px;
+    gap: 8px;
+  }
+
+  .chart-main-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .chart-main-sub {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    text-align: center;
+    line-height: 1.7;
+  }
+
+  /* Fake grouped bar for main chart */
+  .main-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 100px;
+    width: 100%;
+    padding: 0 12px;
+    margin-bottom: 10px;
+  }
+
+  .main-bar-group {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 100%;
+  }
+
+  .main-bar-item {
+    flex: 1;
+    border-radius: 3px 3px 0 0;
+    opacity: .6;
+  }
+
+  .mbi-a { background: var(--accent); }
+  .mbi-b { background: #7bc4f8; }
+  .mbi-c { background: #6fdc96; }
+
+  .h30 { height: 30%; }
+  .h45 { height: 45%; }
+  .h60 { height: 60%; }
+  .h75 { height: 75%; }
+  .h90 { height: 90%; }
+  .h55 { height: 55%; }
+  .h40 { height: 40%; }
+  .h65 { height: 65%; }
+  .h80 { height: 80%; }
+  .h50 { height: 50%; }
+  .h35 { height: 35%; }
+  .h70 { height: 70%; }
+
+  /* AI insight box */
+  .insight-box {
+    border-top: 1px solid var(--border);
+    padding: 14px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .insight-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .insight-text {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-text {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+  }
+
+  .footer-link {
+    color: var(--accent);
+    text-decoration: none;
+  }
+</style>
 </head>
 <body>
-    <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="news.asp">Filtragem</a></li>
-        <li><a href="about.asp">Chatbot</a></li>
-        <li><a href="about.asp">Sobre nós</a></li>
-        <li><a href="https://github.com/leasju/pi_educacao_qualidade">Github</a></li>
-    </ul>
-    <h1>EduStats</h1>
-    <p>Desigualdades Educacionais nos Municípios da Região Metropolitana de Campinas</p>
 
-    <div class="row">
-        <div class="column" style="background-color:#aaa;">Column</div>
-        <div class="column">{{ graph_html|safe }}</div>
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="10" width="3" height="5"/>
+        <rect x="6" y="6" width="3" height="9"/>
+        <rect x="11" y="2" width="3" height="13"/>
+      </svg>
+    </div>
+    edu<span style="color:var(--accent)">stats</span>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#" class="active">Início</a></li>
+    <li><a href="#analise">Análise</a></li>
+    <li><a href="#grafos">Grafos</a></li>
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="https://github.com/leasju/pi_educacao_qualidade" class="btn-github", target="_blank" rel="noopener noreferrer">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      Github ↗
+    </a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="inicio">
+  <h1>Desigualdades Educacionais nos Municípios<br>da Região Metropolitana de Campinas</h1>
+  <p>Este painel apresenta análises exploratórias sobre indicadores educacionais dos municípios da RMC, com foco em proficiência, infraestrutura escolar, absenteísmo docente e fluxo escolar ao longo dos anos.</p>
+  <a class="hero-link" href="https://github.com/leasju/pi_educacao_qualidade" target="_blank" rel="noopener noreferrer">→ Repositório Github</a>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <span class="filters-label">Filtrar por:</span>
+
+  <button class="filter-btn">
+    Município <span class="chevron">▼</span>
+  </button>
+  <button class="filter-btn">
+    Ano <span class="chevron">▼</span>
+  </button>
+  <button class="filter-btn">
+    Competência <span class="chevron">▼</span>
+  </button>
+  <button class="filter-btn">
+    Série <span class="chevron">▼</span>
+  </button>
+
+  <button class="btn-apply">Aplicar</button>
+</div>
+
+<!-- ANÁLISE DOS DATASETS -->
+<section class="section" id="analise">
+  <div class="section-title">Análise dos Datasets</div>
+  <div class="section-sub">Explore os indicadores educacionais da RMC por município e período</div>
+
+  <div class="cards-grid">
+
+    <!-- Card 1 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Proficiência SARESP por Município</span>
+        <span class="card-badge badge-grouped">Barras Agrupadas</span>
+      </div>
+      <div class="card-chart">
+        <div class="bars-visual">
+          <div class="bar bar-1"></div>
+          <div class="bar bar-2"></div>
+          <div class="bar bar-3"></div>
+          <div class="bar bar-4"></div>
+          <div class="bar bar-5"></div>
+          <div class="bar bar-6"></div>
+          <div class="bar bar-1"></div>
+          <div class="bar bar-3"></div>
+          <div class="bar bar-5"></div>
+          <div class="bar bar-2"></div>
+          <div class="bar bar-4"></div>
+          <div class="bar bar-6"></div>
+        </div>
+        <div class="chart-label">Barras agrupadas</div>
+        <div class="chart-sub">Visualização de dados</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-desc">Análise comparativa de proficiência por município e disciplina ao longo dos anos do SARESP. Identifica padrões e variações regionais significativas.</div>
+      </div>
     </div>
 
-    <div class="footer">
-        <p>Footer</p>
+    <!-- Card 2 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Proficiência × Absenteísmo Docente</span>
+        <span class="card-badge badge-available">Disponível</span>
+      </div>
+      <div class="card-chart">
+        <div class="scatter-visual">
+          <div class="dot" style="top:20%;left:15%"></div>
+          <div class="dot" style="top:60%;left:25%"></div>
+          <div class="dot" style="top:35%;left:40%"></div>
+          <div class="dot" style="top:75%;left:55%"></div>
+          <div class="dot" style="top:15%;left:65%"></div>
+          <div class="dot" style="top:50%;left:75%"></div>
+          <div class="dot" style="top:30%;left:82%"></div>
+          <div class="dot" style="top:70%;left:45%"></div>
+          <div class="dot" style="top:45%;left:60%"></div>
+          <div class="dot" style="top:25%;left:30%"></div>
+          <div class="dot" style="top:80%;left:70%"></div>
+          <div class="dot" style="top:10%;left:50%"></div>
+        </div>
+        <div class="chart-label">Dispersão</div>
+        <div class="chart-sub">Visualização de dados</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-desc">Correlação entre taxas de absenteísmo de professores e desempenho dos alunos por escola e município, evidenciando impactos no aprendizado.</div>
+      </div>
     </div>
 
+    <!-- Card 3 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Taxa de Aprovação e Reprovação</span>
+        <span class="card-badge badge-grouped">Barras empilhadas</span>
+      </div>
+      <div class="card-chart">
+        <div class="bars-visual">
+          <div class="bar bar-s1"></div>
+          <div class="bar bar-s2"></div>
+          <div class="bar bar-s3"></div>
+          <div class="bar bar-s4"></div>
+          <div class="bar bar-s5"></div>
+          <div class="bar bar-s6"></div>
+          <div class="bar bar-s1"></div>
+          <div class="bar bar-s3"></div>
+          <div class="bar bar-s5"></div>
+          <div class="bar bar-s2"></div>
+          <div class="bar bar-s4"></div>
+          <div class="bar bar-s6"></div>
+        </div>
+        <div class="chart-label">Barras empilhadas</div>
+        <div class="chart-sub">Visualização de dados</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-desc">Distribuição proporcional de aprovação, reprovação e abandono escolar por série e município. Revela tendências temporais no fluxo escolar da RMC.</div>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Fluxo Escolar × Infraestrutura</span>
+        <span class="card-badge badge-available">Disponível</span>
+      </div>
+      <div class="card-chart">
+        <div class="scatter-visual">
+          <div class="dot" style="top:30%;left:20%;background:#f5a623"></div>
+          <div class="dot" style="top:55%;left:35%;background:#f5a623"></div>
+          <div class="dot" style="top:20%;left:50%;background:#f5a623"></div>
+          <div class="dot" style="top:65%;left:60%;background:#f5a623"></div>
+          <div class="dot" style="top:40%;left:75%;background:#f5a623"></div>
+          <div class="dot" style="top:75%;left:30%;background:#f5a623"></div>
+          <div class="dot" style="top:15%;left:70%;background:#f5a623"></div>
+          <div class="dot" style="top:50%;left:45%;background:#f5a623"></div>
+          <div class="dot" style="top:80%;left:80%;background:#f5a623"></div>
+          <div class="dot" style="top:10%;left:15%;background:#f5a623"></div>
+        </div>
+        <div class="chart-label">Dispersão</div>
+        <div class="chart-sub">Visualização de dados</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-desc">Relação entre qualidade da infraestrutura física das escolas e indicadores de fluxo escolar, como aprovação e evasão, nos municípios da RMC.</div>
+      </div>
+    </div>
+
+    <!-- Card 5 — linha -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Ausências de Servidores por Mês</span>
+        <span class="card-badge badge-lines">Linhas</span>
+      </div>
+      <div class="card-chart">
+        <svg class="line-visual" viewBox="0 0 280 60" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="0,45 40,35 80,40 120,20 160,28 200,15 240,22 280,10"
+            fill="none" stroke="#c59bfa" stroke-width="2" opacity=".7"/>
+          <polyline points="0,55 40,50 80,45 120,42 160,38 200,35 240,30 280,28"
+            fill="none" stroke="#7bc4f8" stroke-width="2" opacity=".5" stroke-dasharray="4,3"/>
+        </svg>
+        <div class="chart-label">Linhas</div>
+        <div class="chart-sub">Visualização de dados</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-desc">Evolução mensal das ausências de servidores por categoria funcional e município. Permite identificar sazonalidades e anomalias no quadro docente.</div>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Infraestrutura Escolar × Desempenho</span>
+        <span class="card-badge badge-lines">Linhas</span>
+      </div>
+      <div class="card-chart">
+        <svg class="line-visual" viewBox="0 0 280 60" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="0,50 40,42 80,38 120,30 160,25 200,20 240,16 280,12"
+            fill="none" stroke="#6fdc96" stroke-width="2" opacity=".7"/>
+          <polyline points="0,55 40,53 80,48 120,44 160,40 200,36 240,33 280,30"
+            fill="none" stroke="#f5a623" stroke-width="2" opacity=".5" stroke-dasharray="4,3"/>
+        </svg>
+        <div class="chart-label">Dispersão</div>
+        <div class="chart-sub">Visualização de dados</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-desc">Análise longitudinal do impacto de melhorias em infraestrutura sobre o desempenho escolar, cruzando investimentos e resultados do SARESP por período.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="separator"></div>
+
+<!-- ANÁLISE POR MUNICÍPIO -->
+<section class="municipality-section" id="grafos">
+  <div class="section-title">Análise com Filtro por Município</div>
+  <div class="section-sub">Selecione municípios e tipo de visualização para comparação direta</div>
+
+  <div class="municipality-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section-label">Municípios da RMC</div>
+
+      <label class="checkbox-item">
+        <input type="checkbox" checked />
+        <span class="checkbox-label" style="color:var(--accent);font-weight:500">Campinas</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" />
+        <span class="checkbox-label">Hortolândia</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" />
+        <span class="checkbox-label">Sumaré</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" />
+        <span class="checkbox-label">Indaiatuba</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" />
+        <span class="checkbox-label">Paulínia</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" />
+        <span class="checkbox-label">Americana</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" />
+        <span class="checkbox-label">Valinhos</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" />
+        <span class="checkbox-label">Vinhedo</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" />
+        <span class="checkbox-label">Itatiba</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" />
+        <span class="checkbox-label">Sto. Antônio de Posse</span>
+      </label>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-section-label">Tipo de gráfico</div>
+
+      <label class="radio-item">
+        <input type="radio" name="chart-type" checked />
+        <span class="checkbox-label" style="color:var(--accent);font-weight:500">Barras</span>
+      </label>
+      <label class="radio-item">
+        <input type="radio" name="chart-type" />
+        <span class="checkbox-label">Dispersão</span>
+      </label>
+      <label class="radio-item">
+        <input type="radio" name="chart-type" />
+        <span class="checkbox-label">Linhas</span>
+      </label>
+      <label class="radio-item">
+        <input type="radio" name="chart-type" />
+        <span class="checkbox-label">Radar</span>
+      </label>
+    </div>
+
+    <!-- Main chart -->
+    <div class="chart-main">
+      <div class="chart-main-header">
+        <span class="chart-main-title">Comparativo por Município Selecionado</span>
+        <a class="chart-main-link" href="#">Gráfico em tela cheia ↗</a>
+      </div>
+
+      <div class="chart-main-body">
+        <div class="main-bars">
+          <div class="main-bar-group">
+            <div class="main-bar-item mbi-a h60"></div>
+            <div class="main-bar-item mbi-b h45"></div>
+          </div>
+          <div class="main-bar-group">
+            <div class="main-bar-item mbi-a h80"></div>
+            <div class="main-bar-item mbi-b h65"></div>
+          </div>
+          <div class="main-bar-group">
+            <div class="main-bar-item mbi-a h50"></div>
+            <div class="main-bar-item mbi-b h40"></div>
+          </div>
+          <div class="main-bar-group">
+            <div class="main-bar-item mbi-a h90"></div>
+            <div class="main-bar-item mbi-b h75"></div>
+          </div>
+          <div class="main-bar-group">
+            <div class="main-bar-item mbi-a h70"></div>
+            <div class="main-bar-item mbi-b h55"></div>
+          </div>
+          <div class="main-bar-group">
+            <div class="main-bar-item mbi-a h35"></div>
+            <div class="main-bar-item mbi-b h30"></div>
+          </div>
+        </div>
+        <div class="chart-main-label">Barras agrupadas — Municípios selecionados</div>
+        <div class="chart-main-sub">eixo x: Município · eixo y: Indicador selecionado</div>
+      </div>
+
+      <div class="insight-box">
+        <span class="insight-icon">🤖</span>
+        <div class="insight-text">
+          A análise destes gráficos revela que municípios com maior infraestrutura escolar tendem a apresentar melhores índices de proficiência no SARESP. Correlações significativas foram identificadas entre ausências docentes e queda de desempenho (r = 0.71, p &lt; 0.01). Recomenda-se ampliar o conjunto de dados para confirmar causalidade nas regiões periféricas da RMC.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="sobre">
+  <span class="footer-text">edustats · Região Metropolitana de Campinas · dados educacionais</span>
+  <span class="footer-text">Construído com <a class="footer-link" href="https://flask.palletsprojects.com", target="_blank" rel="noopener noreferrer">Flask</a> + <a class="footer-link" href="https://pandas.pydata.org", target="_blank" rel="noopener noreferrer">Pandas</a></span>
+</footer>
+
+<script>
+  // Highlight nav on scroll
+  const sections = document.querySelectorAll('section, .hero');
+  const links = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    links.forEach(a => {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+    });
+  });
+
+  // Filter button toggle
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.style.borderColor = btn.style.borderColor === 'var(--accent)' ? '' : 'var(--accent)';
+      btn.style.color = btn.style.color === 'var(--accent)' ? '' : 'var(--accent)';
+    });
+  });
+</script>
 </body>
 </html>
