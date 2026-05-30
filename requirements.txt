@@ -9,3 +9,6 @@ numpy
 importnb
 flask
 gunicorn
+google-generativeai
+google-genai
+
