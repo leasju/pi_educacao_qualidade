@@ -807,3 +807,174 @@ footer {
   color: var(--accent);
   text-decoration: none;
 }
+
+/* ── CHATBOT GEMINI ── */
+
+/* Botão flutuante no canto inferior direito */
+#chat-bubble {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 52px;
+  height: 52px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: transform .2s;
+}
+
+#chat-bubble:hover {
+  transform: scale(1.08);
+}
+
+/* Janela do chat — oculta por padrão, exibida com .open */
+#chat-box {
+  display: none;
+  flex-direction: column;
+  position: fixed;
+  bottom: 90px;
+  right: 28px;
+  width: 340px;
+  height: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 998;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+#chat-box.open {
+  display: flex;
+}
+
+/* Cabeçalho */
+#chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+#chat-header button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  transition: color .15s;
+}
+
+#chat-header button:hover {
+  color: var(--text);
+}
+
+/* Área de mensagens com scroll */
+#chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#chat-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+/* Bolhas de mensagem */
+.msg {
+  max-width: 88%;
+  font-size: 12.5px;
+  line-height: 1.6;
+  padding: 8px 12px;
+  border-radius: 10px;
+  word-break: break-word;
+}
+
+/* Mensagem do bot: alinhada à esquerda */
+.msg.bot {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  align-self: flex-start;
+  border-bottom-left-radius: 3px;
+}
+
+/* Mensagem do usuário: alinhada à direita */
+.msg.user {
+  background: var(--accent);
+  color: #0f0f0f;
+  font-weight: 500;
+  align-self: flex-end;
+  border-bottom-right-radius: 3px;
+}
+
+/* Estado de carregamento enquanto aguarda a API */
+.msg.loading {
+  opacity: .5;
+  font-style: italic;
+}
+
+/* Área de input na base do chat */
+#chat-input-area {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+  flex-shrink: 0;
+}
+
+#chat-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color .18s;
+}
+
+#chat-input:focus {
+  border-color: var(--accent);
+}
+
+#chat-input-area button {
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #0f0f0f;
+  font-size: 16px;
+  width: 36px;
+  cursor: pointer;
+  transition: opacity .18s;
+  flex-shrink: 0;
+}
+
+#chat-input-area button:hover {
+  opacity: .85;
+}

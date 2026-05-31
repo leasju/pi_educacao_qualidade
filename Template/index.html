@@ -13,7 +13,7 @@
 
 <body>
 
-  <!-- NAV -->
+  <!-- ── NAV ── -->
   <nav>
     <a class="logo" href="#">
       <div class="logo-icon">
@@ -31,7 +31,7 @@
       <li><a href="#analise">Análise</a></li>
       <li><a href="#grafos">Grafos</a></li>
       <li><a href="#sobre">Sobre</a></li>
-      <li><a href="https://github.com/leasju/pi_educacao_qualidade" class="btn-github" , target="_blank"
+      <li><a href="https://github.com/leasju/pi_educacao_qualidade" class="btn-github" target="_blank"
           rel="noopener noreferrer">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
             <path
@@ -42,7 +42,7 @@
     </ul>
   </nav>
 
-  <!-- HERO -->
+  <!-- ── HERO ── -->
   <div class="hero" id="inicio">
     <h1>Desigualdades Educacionais nos Municípios<br>da Região Metropolitana de Campinas</h1>
     <p>Este painel apresenta análises exploratórias sobre indicadores educacionais dos municípios da RMC, com foco em
@@ -51,7 +51,7 @@
       rel="noopener noreferrer">→ Repositório Github</a>
   </div>
 
-  <!-- FILTERS -->
+  <!-- ── FILTERS ── -->
   <div class="filters-bar">
     <span class="filters-label">Filtrar por:</span>
 
@@ -71,14 +71,14 @@
     <button class="btn-apply">Aplicar</button>
   </div>
 
-  <!-- ANÁLISE DOS DATASETS -->
+  <!-- ── ANÁLISE DOS DATASETS ── -->
   <section class="section" id="analise">
     <div class="section-title">Análise dos Datasets</div>
     <div class="section-sub">Explore os indicadores educacionais da RMC por município e período</div>
 
     <div class="cards-grid">
 
-      <!-- Card 1 -->
+      <!-- Card 1: Proficiência SARESP -->
       <div class="card">
         <div class="card-header">
           <span class="card-title">Proficiência SARESP por Município</span>
@@ -108,7 +108,7 @@
         </div>
       </div>
 
-      <!-- Card 2 -->
+      <!-- Card 2: Proficiência × Absenteísmo -->
       <div class="card">
         <div class="card-header">
           <span class="card-title">Proficiência × Absenteísmo Docente</span>
@@ -138,7 +138,7 @@
         </div>
       </div>
 
-      <!-- Card 3 -->
+      <!-- Card 3: Aprovação e Reprovação -->
       <div class="card">
         <div class="card-header">
           <span class="card-title">Taxa de Aprovação e Reprovação</span>
@@ -168,7 +168,7 @@
         </div>
       </div>
 
-      <!-- Card 4 -->
+      <!-- Card 4: Fluxo × Infraestrutura -->
       <div class="card">
         <div class="card-header">
           <span class="card-title">Fluxo Escolar × Infraestrutura</span>
@@ -196,7 +196,7 @@
         </div>
       </div>
 
-      <!-- Card 5 — linha -->
+      <!-- Card 5: Ausências por Mês -->
       <div class="card">
         <div class="card-header">
           <span class="card-title">Ausências de Servidores por Mês</span>
@@ -218,7 +218,7 @@
         </div>
       </div>
 
-      <!-- Card 6 -->
+      <!-- Card 6: Infraestrutura × Desempenho -->
       <div class="card">
         <div class="card-header">
           <span class="card-title">Infraestrutura Escolar × Desempenho</span>
@@ -245,14 +245,14 @@
 
   <div class="separator"></div>
 
-  <!-- ANÁLISE POR MUNICÍPIO -->
+  <!-- ── ANÁLISE POR MUNICÍPIO ── -->
   <section class="municipality-section" id="grafos">
     <div class="section-title">Análise com Filtro por Município</div>
     <div class="section-sub">Selecione municípios e tipo de visualização para comparação direta</div>
 
     <div class="municipality-layout">
 
-      <!-- Sidebar -->
+      <!-- Sidebar de filtros -->
       <div class="sidebar">
         <div class="sidebar-section-label">Municípios da RMC</div>
 
@@ -319,7 +319,7 @@
         </label>
       </div>
 
-      <!-- Main chart -->
+      <!-- Área principal do gráfico -->
       <div class="chart-main">
         <div class="chart-main-header">
           <span class="chart-main-title">Comparativo por Município Selecionado</span>
@@ -371,16 +371,43 @@
     </div>
   </section>
 
-  <!-- FOOTER -->
+  <!-- ── FOOTER ── -->
   <footer id="sobre">
     <span class="footer-text">edustats · Região Metropolitana de Campinas · dados educacionais</span>
-    <span class="footer-text">Construído com <a class="footer-link" href="https://flask.palletsprojects.com" ,
-        target="_blank" rel="noopener noreferrer">Flask</a> + <a class="footer-link" href="https://pandas.pydata.org" ,
+    <span class="footer-text">Construído com <a class="footer-link" href="https://flask.palletsprojects.com"
+        target="_blank" rel="noopener noreferrer">Flask</a> + <a class="footer-link" href="https://pandas.pydata.org"
         target="_blank" rel="noopener noreferrer">Pandas</a></span>
   </footer>
 
+  <!-- ── CHATBOT GEMINI ── -->
+
+<!-- Botão flutuante -->
+<div id="chat-bubble" onclick="toggleChat()" title="Assistente IA">🤖</div>
+
+<!-- Janela do chat -->
+<div id="chat-box">
+  <div id="chat-header">
+    <span>Assistente EduStats</span>
+    <button onclick="toggleChat()" aria-label="Fechar chat">✕</button>
+  </div>
+  <div id="chat-messages">
+    <div class="msg bot">Olá! Posso te ajudar a interpretar os dados educacionais da RMC. O que deseja saber?</div>
+  </div>
+  <div id="chat-input-area">
+    <input
+      id="chat-input"
+      type="text"
+      placeholder="Pergunte sobre os dados..."
+      onkeydown="if(event.key==='Enter') sendMessage()"
+      autocomplete="off"
+    />
+    <button onclick="sendMessage()" aria-label="Enviar mensagem">➤</button>
+  </div>
+</div>
+
+  <!-- ── SCRIPTS DO SITE (originais) ── -->
   <script>
-    // Highlight nav on scroll
+    // Highlight do link ativo na nav ao fazer scroll
     const sections = document.querySelectorAll('section, .hero');
     const links = document.querySelectorAll('.nav-links a');
 
@@ -395,7 +422,7 @@
       });
     });
 
-    // Filter button toggle
+    // Toggle visual nos botões de filtro
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         btn.style.borderColor = btn.style.borderColor === 'var(--accent)' ? '' : 'var(--accent)';
@@ -403,6 +430,10 @@
       });
     });
   </script>
-</body>
 
+  <!-- ── SCRIPT DO CHATBOT GEMINI ── -->
+  <!-- Chatbot Gemini -->
+  <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
+
+</body>
 </html>
