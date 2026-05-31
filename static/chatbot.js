@@ -1,6 +1,4 @@
-const GEMINI_KEY = "SUA_CHAVE_AQUI";
-
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
+const GEMINI_URL = "/api/chat";
 
 const SYSTEM_CTX = `Você é um assistente especializado no painel EduStats,
   que analisa desigualdades educacionais nos municípios da Região Metropolitana
