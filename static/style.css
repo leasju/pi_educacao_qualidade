@@ -824,20 +824,31 @@ footer {
 /* Botão flutuante no canto inferior direito */
 #chat-bubble {
   position: fixed;
-  bottom: 28px;
-  right: 28px;
-  width: 52px;
-  height: 52px;
+
+  /* posição responsiva */
+  bottom: clamp(16px, 3vh, 28px);
+  right: clamp(16px, 3vw, 28px);
+
+  /* tamanho responsivo */
+  width: clamp(45px, 6vw, 60px);
+  height: clamp(45px, 6vw, 60px);
+
   background: var(--accent);
   border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   cursor: pointer;
   z-index: 999;
+
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  transition: transform .2s;
-  overflow: hidden; /* ← garante que a imagem não vaze do círculo */
+
+  /* animações melhores */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  overflow: hidden;
 }
 
 #chat-bubble img {
@@ -858,8 +869,8 @@ footer {
   position: fixed;
   bottom: 90px;
   right: 28px;
-  width: 340px;
-  height: 460px;
+  width: 800px;
+  height: 700px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
