@@ -29,24 +29,30 @@ def home():
 # A chave fica aqui no servidor, invisível pro navegador
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    gemini_key = os.environ.get("GEMINI_KEY")
-    print("[DEBUG] KEY carregada?", bool(os.environ.get("GEMINI_KEY"))) # Debug
+    openrouter_key = os.environ.get("OPENROUTER_KEY")
+    if not openrouter_key:
+        return jsonify({"error": "Chave não configurada"}), 500
 
-    if not gemini_key:
-        return jsonify({"error": "Chave da API não configurada."}), 500
+    body = request.json
 
-    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={gemini_key}"
-
-    # Repassa o body enviado pelo JS diretamente para a API do Gemini
     response = requests.post(
-        gemini_url,
-        json=request.json,
-        headers={"Content-Type": "application/json"}
+        "https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {openrouter_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:8080",  # opcional mas recomendado
+            "X-Title": "EduStats RMC"                 # aparece no dashboard do OpenRouter
+        },
+        json={
+            "model": "meta-llama/llama-3.3-70b-instruct:free",  # modelo gratuito
+            "messages": body.get("messages", []),
+            "max_tokens": 1000
+        }
     )
 
     if response.status_code == 429:
-        return jsonify({"candidates": [{"content": {"parts": [{"text": "Muitas requisições em pouco tempo. Aguarde um momento e tente novamente!"}]}}]}), 200
-    
+        return jsonify({"choices": [{"message": {"content": "Muitas requisições. Aguarde um momento!"}}]}), 200
+
     return jsonify(response.json()), response.status_code
 
 if __name__ == "__main__":
