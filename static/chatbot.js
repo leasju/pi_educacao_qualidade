@@ -48,6 +48,7 @@ async function sendMessage() {
         });
 
         const data = await response.json();
+        console.log("[DEBUG] Resposta completa:", JSON.stringify(data, null, 2));
         const reply = data.choices?.[0]?.message?.content || "Não consegui gerar uma resposta. Tente novamente.";
 
         chatHistory.push({ role: "assistant", content: reply });

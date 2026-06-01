@@ -1,3 +1,5 @@
+# python app.py
+
 import os
 import requests
 import plotly.express as px
@@ -25,8 +27,14 @@ def home():
 
 
 # ─── ROTA DO CHATBOT ─────────────────────────────────────────
-# O JS do frontend chama /api/chat em vez da API do Gemini diretamente
-# A chave fica aqui no servidor, invisível pro navegador
+MODELS = [
+    "meta-llama/llama-3.3-70b-instruct:free",  
+    "google/gemma-4-31b-it:free",               
+    "deepseek/deepseek-v4-flash:free",          
+    "openai/gpt-oss-120b:free",                 
+    "z-ai/glm-4.5-air:free",                    
+]
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
     openrouter_key = os.environ.get("OPENROUTER_KEY")
@@ -35,25 +43,33 @@ def chat():
 
     body = request.json
 
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {openrouter_key}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:8080",  # opcional mas recomendado
-            "X-Title": "EduStats RMC"                 # aparece no dashboard do OpenRouter
-        },
-        json={
-            "model": "meta-llama/llama-3.3-70b-instruct:free",  # modelo gratuito
-            "messages": body.get("messages", []),
-            "max_tokens": 1000
-        }
-    )
+    for model in MODELS:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {openrouter_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "http://localhost:8080",
+                "X-Title": "EduStats RMC"
+            },
+            json={
+                "model": model,
+                "messages": body.get("messages", []),
+                "max_tokens": 1000
+            }
+        )
 
-    if response.status_code == 429:
-        return jsonify({"choices": [{"message": {"content": "Muitas requisições. Aguarde um momento!"}}]}), 200
+        print(f"[DEBUG] Modelo: {model} | Status: {response.status_code}")
 
-    return jsonify(response.json()), response.status_code
+        if response.status_code not in (429, 404):
+           return jsonify(response.json()), response.status_code
+
+        print(f"[FALLBACK] {model} | Status: {response.status_code} | Erro: {response.text}")
+        continue
+
+        return jsonify(response.json()), response.status_code
+
+    return jsonify({"choices": [{"message": {"content": "Todos os modelos estão sobrecarregados. Tente novamente em instantes!"}}]}), 200
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
