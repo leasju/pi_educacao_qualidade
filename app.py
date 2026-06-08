@@ -113,5 +113,75 @@ Use esses dados para responder perguntas sobre municípios, anos e indicadores e
     return jsonify({"choices": [{"message": {"content": "Todos os modelos estão sobrecarregados. Tente novamente em instantes!"}}]}), 200
 
 
+# ─── ROTA DE DADOS PARA GRÁFICOS ────────────────────────────
+@app.route("/api/chart-data", methods=["GET"])
+def chart_data():
+    """Retorna dados estruturados para os gráficos Plotly"""
+    
+    # Dados mock para testes (substitua com Mongo quando disponível)
+    data = {
+        "MÉDIA_PROFICIÊNCIA": {
+            "labels": ["Campinas", "Hortolândia", "Sumaré", "Indaiatuba", "Paulínia", "Americana"],
+            "datasets": [{
+                "label": "Proficiência Média SARESP",
+                "data": [72.5, 68.3, 65.8, 70.2, 67.4, 69.1]
+            }]
+        },
+        "PROFICIÊNCIA_VS_AUSÊNCIA": {
+            "data": [
+                {"x": 5.2, "y": 72.5, "label": "Campinas"},
+                {"x": 8.1, "y": 68.3, "label": "Hortolândia"},
+                {"x": 6.7, "y": 65.8, "label": "Sumaré"},
+                {"x": 4.5, "y": 70.2, "label": "Indaiatuba"},
+                {"x": 7.3, "y": 67.4, "label": "Paulínia"},
+                {"x": 6.2, "y": 69.1, "label": "Americana"}
+            ]
+        },
+        "APROVAÇÃO_E_REPROVAÇÃO": {
+            "labels": ["Campinas", "Hortolândia", "Sumaré", "Indaiatuba"],
+            "datasets": [
+                {"label": "Aprovação", "data": [78.5, 75.2, 72.1, 76.8]},
+                {"label": "Reprovação", "data": [15.3, 18.2, 21.4, 16.5]},
+                {"label": "Abandono", "data": [6.2, 6.6, 6.5, 6.7]}
+            ]
+        },
+        "FLUXO_VS_INFRAESTRUTURA": {
+            "data": [
+                {"x": 78, "y": 8.2, "label": "Campinas"},
+                {"x": 75, "y": 6.9, "label": "Hortolândia"},
+                {"x": 72, "y": 5.3, "label": "Sumaré"},
+                {"x": 77, "y": 7.8, "label": "Indaiatuba"},
+                {"x": 74, "y": 6.5, "label": "Paulínia"},
+                {"x": 76, "y": 7.2, "label": "Americana"}
+            ]
+        },
+        "TOTAL_DIAS_AUSENTES": {
+            "labels": ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+            "datasets": [
+                {"label": "Campinas", "data": [245, 238, 251, 268, 290, 312, 328, 315, 298, 276, 255, 242]},
+                {"label": "Hortolândia", "data": [156, 148, 162, 178, 195, 210, 224, 215, 202, 185, 168, 152]},
+                {"label": "Sumaré", "data": [128, 122, 135, 148, 162, 175, 188, 178, 165, 152, 138, 125]}
+            ]
+        },
+        "INFRA_TREND": {
+            "labels": ["2022", "2023", "2024"],
+            "datasets": [
+                {"label": "Infraestrutura (Score)", "data": [6.2, 6.8, 7.3]},
+                {"label": "Proficiência SARESP", "data": [68.1, 69.5, 71.2]}
+            ]
+        },
+        "main_chart": {
+            "labels": ["Campinas", "Hortolândia", "Sumaré", "Indaiatuba", "Paulínia", "Americana"],
+            "datasets": [
+                {"label": "2022", "data": [65.2, 62.1, 59.8, 64.5, 61.3, 63.2]},
+                {"label": "2023", "data": [68.7, 65.4, 63.2, 67.1, 64.8, 66.5]},
+                {"label": "2024", "data": [72.1, 68.9, 66.5, 70.8, 68.2, 70.3]}
+            ]
+        }
+    }
+    
+    return jsonify(data), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
