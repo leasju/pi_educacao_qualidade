@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -10,6 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 </head>
 
 <body>
@@ -85,10 +86,10 @@
           <span class="card-title">Proficiência SARESP por Município</span>
           <span class="card-badge badge-grouped">Barras Agrupadas</span>
         </div>
-        <div class="card-chart">
+        <div class="card-chart chart-wrapper" data-chart-key="infraestrutura_saresp">
+          <div class="chart-loading">Carregando gráfico...</div>
           <canvas id="chart-proficiency"></canvas>
-          <div class="chart-label">Barras agrupadas</div>
-          <div class="chart-sub">Visualização de dados</div>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Análise comparativa de proficiência por município e disciplina ao longo dos anos do
@@ -102,10 +103,10 @@
           <span class="card-title">Proficiência × Absenteísmo Docente</span>
           <span class="card-badge badge-available">Disponível</span>
         </div>
-        <div class="card-chart">
+        <div class="card-chart chart-wrapper" data-chart-key="ausencia_reprovacao">
+          <div class="chart-loading">Carregando gráfico...</div>
           <canvas id="chart-absence-prof"></canvas>
-          <div class="chart-label">Dispersão</div>
-          <div class="chart-sub">Visualização de dados</div>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Correlação entre taxas de absenteísmo de professores e desempenho dos alunos por escola
@@ -119,10 +120,10 @@
           <span class="card-title">Taxa de Aprovação e Reprovação</span>
           <span class="card-badge badge-grouped">Barras empilhadas</span>
         </div>
-        <div class="card-chart">
+        <div class="card-chart chart-wrapper" data-chart-key="aluno_professor_aprovacao">
+          <div class="chart-loading">Carregando gráfico...</div>
           <canvas id="chart-approval"></canvas>
-          <div class="chart-label">Barras empilhadas</div>
-          <div class="chart-sub">Visualização de dados</div>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Distribuição proporcional de aprovação, reprovação e abandono escolar por série e
@@ -136,10 +137,10 @@
           <span class="card-title">Fluxo Escolar × Infraestrutura</span>
           <span class="card-badge badge-available">Disponível</span>
         </div>
-        <div class="card-chart">
+        <div class="card-chart chart-wrapper" data-chart-key="tecnologia_saresp">
+          <div class="chart-loading">Carregando gráfico...</div>
           <canvas id="chart-flux-infra"></canvas>
-          <div class="chart-label">Dispersão</div>
-          <div class="chart-sub">Visualização de dados</div>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Relação entre qualidade da infraestrutura física das escolas e indicadores de fluxo
@@ -153,10 +154,10 @@
           <span class="card-title">Ausências de Servidores por Mês</span>
           <span class="card-badge badge-lines">Linhas</span>
         </div>
-        <div class="card-chart">
+        <div class="card-chart chart-wrapper" data-chart-key="evolucao_temporal">
+          <div class="chart-loading">Carregando gráfico...</div>
           <canvas id="chart-absence-trend"></canvas>
-          <div class="chart-label">Linhas</div>
-          <div class="chart-sub">Visualização de dados</div>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Evolução mensal das ausências de servidores por categoria funcional e município.
@@ -170,10 +171,10 @@
           <span class="card-title">Infraestrutura Escolar × Desempenho</span>
           <span class="card-badge badge-lines">Linhas</span>
         </div>
-        <div class="card-chart">
+        <div class="card-chart chart-wrapper" data-chart-key="ranking_municipios">
+          <div class="chart-loading">Carregando gráfico...</div>
           <canvas id="chart-infra-performance"></canvas>
-          <div class="chart-label">Dispersão</div>
-          <div class="chart-sub">Visualização de dados</div>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Análise longitudinal do impacto de melhorias em infraestrutura sobre o desempenho
@@ -198,44 +199,35 @@
         <div class="sidebar-section-label">Municípios da RMC</div>
 
         <label class="checkbox-item">
-          <input type="checkbox" checked />
+          <input type="checkbox" value="Campinas" checked />
           <span class="checkbox-label" style="color:var(--accent);font-weight:500">Campinas</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Hortolândia" />
           <span class="checkbox-label">Hortolândia</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Sumaré" />
           <span class="checkbox-label">Sumaré</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Indaiatuba" />
           <span class="checkbox-label">Indaiatuba</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Paulínia" />
           <span class="checkbox-label">Paulínia</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Americana" />
           <span class="checkbox-label">Americana</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Valinhos" />
           <span class="checkbox-label">Valinhos</span>
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" />
-          <span class="checkbox-label">Vinhedo</span>
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" />
-          <span class="checkbox-label">Itatiba</span>
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" />
-          <span class="checkbox-label">Sto. Antônio de Posse</span>
+        </label>        <label class="checkbox-item">
+          <input type="checkbox" value="Santa Bárbara D'Oeste" />
+          <span class="checkbox-label">Santa Bárbara D'Oeste</span>
         </label>
 
         <div class="sidebar-divider"></div>
@@ -267,10 +259,12 @@
           <a class="chart-main-link" href="#">Gráfico em tela cheia ↗</a>
         </div>
 
-        <div class="chart-main-body">
+        <div class="chart-main-body chart-wrapper" data-filter-chart="true">
+          <div class="chart-loading">Carregando gráfico...</div>
           <canvas id="chart-main"></canvas>
-          <div class="chart-main-label" id="chart-main-label">Comparativo por Município Selecionado</div>
-          <div class="chart-main-sub" id="chart-main-sub">eixo x: Município · eixo y: Indicador selecionado</div>
+          <div class="chart-error" hidden></div>
+          <div class="chart-main-label" id="chart-main-label">Ranking Geral dos Municípios</div>
+          <div class="chart-main-sub" id="chart-main-sub">eixo x: Índice Educação · eixo y: Município</div>
         </div>
 
         <div class="insight-box">
@@ -351,8 +345,9 @@
 
   <!-- ── SCRIPT DO CHATBOT GEMINI ── -->
   <!-- Chatbot Gemini -->
-  <script src="{{ url_for('static', filename='charts.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chart_loader.js') }}"></script>
   <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
 
 </body>
 </html>
+

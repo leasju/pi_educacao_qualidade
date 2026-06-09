@@ -1071,3 +1071,140 @@ footer {
 #chat-input-area button:hover {
   opacity: .85;
 }
+/* Chart.js responsive wrappers and fetch states */
+.chart-wrapper {
+  width: 100%;
+  max-width: 960px;
+  min-height: 240px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.card-chart.chart-wrapper {
+  min-height: 260px;
+}
+
+.chart-main-body.chart-wrapper {
+  max-width: none;
+  min-height: 360px;
+}
+
+.chart-wrapper canvas {
+  width: 100% !important;
+  min-height: 220px;
+}
+
+.chart-loading,
+.chart-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  background: rgba(22, 22, 22, 0.76);
+  z-index: 2;
+}
+
+.chart-loading::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border: 2px solid rgba(245, 166, 35, 0.24);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: chartSpin .8s linear infinite;
+}
+
+.chart-error {
+  color: #ff6b6b;
+}
+
+.chart-wrapper.is-loaded .chart-loading,
+.chart-wrapper.has-error .chart-loading {
+  display: none;
+}
+
+.chart-wrapper.has-error canvas {
+  opacity: .2;
+}
+
+@keyframes chartSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 680px) {
+  .chart-wrapper {
+    max-width: 100%;
+    min-height: 280px;
+  }
+
+  .chart-wrapper canvas {
+    min-height: 250px;
+  }
+}
+
+/* Chart readability pass */
+.card-chart.chart-wrapper {
+  min-height: 380px;
+  padding: 18px 18px 14px;
+}
+
+.card-chart canvas {
+  max-height: none;
+}
+
+.chart-wrapper canvas {
+  min-height: 330px;
+}
+
+.chart-main-body.chart-wrapper {
+  min-height: 520px;
+  padding: 22px 24px 16px;
+}
+
+.chart-main-body.chart-wrapper canvas {
+  min-height: 420px;
+}
+
+.card {
+  min-height: 520px;
+}
+
+.chart-loading,
+.chart-error {
+  font-size: 13px;
+  background: rgba(15, 15, 15, 0.86);
+}
+
+@media (max-width: 680px) {
+  .card-chart.chart-wrapper {
+    min-height: 360px;
+  }
+
+  .chart-wrapper canvas,
+  .chart-main-body.chart-wrapper canvas {
+    min-height: 320px;
+  }
+
+  .chart-main-body.chart-wrapper {
+    min-height: 440px;
+  }
+}
+.chart-main-body.chart-wrapper > .chart-main-label,
+.chart-main-body.chart-wrapper > .chart-main-sub {
+  flex: 0 0 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.chart-main-body.chart-wrapper > .chart-loading,
+.chart-main-body.chart-wrapper > .chart-error {
+  flex: initial;
+  min-height: 0;
+}
