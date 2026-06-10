@@ -247,6 +247,7 @@ nav {
 .section {
   padding: 40px 32px;
   animation: fadeUp .5s .15s ease both;
+  text-align: center;
 }
 
 .section-title {
