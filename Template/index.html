@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -9,6 +9,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 
 <body>
@@ -84,23 +86,10 @@
           <span class="card-title">Proficiência SARESP por Município</span>
           <span class="card-badge badge-grouped">Barras Agrupadas</span>
         </div>
-        <div class="card-chart">
-          <div class="bars-visual">
-            <div class="bar bar-1"></div>
-            <div class="bar bar-2"></div>
-            <div class="bar bar-3"></div>
-            <div class="bar bar-4"></div>
-            <div class="bar bar-5"></div>
-            <div class="bar bar-6"></div>
-            <div class="bar bar-1"></div>
-            <div class="bar bar-3"></div>
-            <div class="bar bar-5"></div>
-            <div class="bar bar-2"></div>
-            <div class="bar bar-4"></div>
-            <div class="bar bar-6"></div>
-          </div>
-          <div class="chart-label">Barras agrupadas</div>
-          <div class="chart-sub">Visualização de dados</div>
+        <div class="card-chart chart-wrapper" data-chart-key="infraestrutura_saresp">
+          <div class="chart-loading">Carregando gráfico...</div>
+          <canvas id="chart-proficiency"></canvas>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Análise comparativa de proficiência por município e disciplina ao longo dos anos do
@@ -114,23 +103,10 @@
           <span class="card-title">Proficiência × Absenteísmo Docente</span>
           <span class="card-badge badge-available">Disponível</span>
         </div>
-        <div class="card-chart">
-          <div class="scatter-visual">
-            <div class="dot" style="top:20%;left:15%"></div>
-            <div class="dot" style="top:60%;left:25%"></div>
-            <div class="dot" style="top:35%;left:40%"></div>
-            <div class="dot" style="top:75%;left:55%"></div>
-            <div class="dot" style="top:15%;left:65%"></div>
-            <div class="dot" style="top:50%;left:75%"></div>
-            <div class="dot" style="top:30%;left:82%"></div>
-            <div class="dot" style="top:70%;left:45%"></div>
-            <div class="dot" style="top:45%;left:60%"></div>
-            <div class="dot" style="top:25%;left:30%"></div>
-            <div class="dot" style="top:80%;left:70%"></div>
-            <div class="dot" style="top:10%;left:50%"></div>
-          </div>
-          <div class="chart-label">Dispersão</div>
-          <div class="chart-sub">Visualização de dados</div>
+        <div class="card-chart chart-wrapper" data-chart-key="ausencia_reprovacao">
+          <div class="chart-loading">Carregando gráfico...</div>
+          <canvas id="chart-absence-prof"></canvas>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Correlação entre taxas de absenteísmo de professores e desempenho dos alunos por escola
@@ -144,23 +120,10 @@
           <span class="card-title">Taxa de Aprovação e Reprovação</span>
           <span class="card-badge badge-grouped">Barras empilhadas</span>
         </div>
-        <div class="card-chart">
-          <div class="bars-visual">
-            <div class="bar bar-s1"></div>
-            <div class="bar bar-s2"></div>
-            <div class="bar bar-s3"></div>
-            <div class="bar bar-s4"></div>
-            <div class="bar bar-s5"></div>
-            <div class="bar bar-s6"></div>
-            <div class="bar bar-s1"></div>
-            <div class="bar bar-s3"></div>
-            <div class="bar bar-s5"></div>
-            <div class="bar bar-s2"></div>
-            <div class="bar bar-s4"></div>
-            <div class="bar bar-s6"></div>
-          </div>
-          <div class="chart-label">Barras empilhadas</div>
-          <div class="chart-sub">Visualização de dados</div>
+        <div class="card-chart chart-wrapper" data-chart-key="aluno_professor_aprovacao">
+          <div class="chart-loading">Carregando gráfico...</div>
+          <canvas id="chart-approval"></canvas>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Distribuição proporcional de aprovação, reprovação e abandono escolar por série e
@@ -174,21 +137,10 @@
           <span class="card-title">Fluxo Escolar × Infraestrutura</span>
           <span class="card-badge badge-available">Disponível</span>
         </div>
-        <div class="card-chart">
-          <div class="scatter-visual">
-            <div class="dot" style="top:30%;left:20%;background:#f5a623"></div>
-            <div class="dot" style="top:55%;left:35%;background:#f5a623"></div>
-            <div class="dot" style="top:20%;left:50%;background:#f5a623"></div>
-            <div class="dot" style="top:65%;left:60%;background:#f5a623"></div>
-            <div class="dot" style="top:40%;left:75%;background:#f5a623"></div>
-            <div class="dot" style="top:75%;left:30%;background:#f5a623"></div>
-            <div class="dot" style="top:15%;left:70%;background:#f5a623"></div>
-            <div class="dot" style="top:50%;left:45%;background:#f5a623"></div>
-            <div class="dot" style="top:80%;left:80%;background:#f5a623"></div>
-            <div class="dot" style="top:10%;left:15%;background:#f5a623"></div>
-          </div>
-          <div class="chart-label">Dispersão</div>
-          <div class="chart-sub">Visualização de dados</div>
+        <div class="card-chart chart-wrapper" data-chart-key="tecnologia_saresp">
+          <div class="chart-loading">Carregando gráfico...</div>
+          <canvas id="chart-flux-infra"></canvas>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Relação entre qualidade da infraestrutura física das escolas e indicadores de fluxo
@@ -202,15 +154,10 @@
           <span class="card-title">Ausências de Servidores por Mês</span>
           <span class="card-badge badge-lines">Linhas</span>
         </div>
-        <div class="card-chart">
-          <svg class="line-visual" viewBox="0 0 280 60" xmlns="http://www.w3.org/2000/svg">
-            <polyline points="0,45 40,35 80,40 120,20 160,28 200,15 240,22 280,10" fill="none" stroke="#c59bfa"
-              stroke-width="2" opacity=".7" />
-            <polyline points="0,55 40,50 80,45 120,42 160,38 200,35 240,30 280,28" fill="none" stroke="#7bc4f8"
-              stroke-width="2" opacity=".5" stroke-dasharray="4,3" />
-          </svg>
-          <div class="chart-label">Linhas</div>
-          <div class="chart-sub">Visualização de dados</div>
+        <div class="card-chart chart-wrapper" data-chart-key="evolucao_temporal">
+          <div class="chart-loading">Carregando gráfico...</div>
+          <canvas id="chart-absence-trend"></canvas>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Evolução mensal das ausências de servidores por categoria funcional e município.
@@ -224,15 +171,10 @@
           <span class="card-title">Infraestrutura Escolar × Desempenho</span>
           <span class="card-badge badge-lines">Linhas</span>
         </div>
-        <div class="card-chart">
-          <svg class="line-visual" viewBox="0 0 280 60" xmlns="http://www.w3.org/2000/svg">
-            <polyline points="0,50 40,42 80,38 120,30 160,25 200,20 240,16 280,12" fill="none" stroke="#6fdc96"
-              stroke-width="2" opacity=".7" />
-            <polyline points="0,55 40,53 80,48 120,44 160,40 200,36 240,33 280,30" fill="none" stroke="#f5a623"
-              stroke-width="2" opacity=".5" stroke-dasharray="4,3" />
-          </svg>
-          <div class="chart-label">Dispersão</div>
-          <div class="chart-sub">Visualização de dados</div>
+        <div class="card-chart chart-wrapper" data-chart-key="ranking_municipios">
+          <div class="chart-loading">Carregando gráfico...</div>
+          <canvas id="chart-infra-performance"></canvas>
+          <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
           <div class="card-desc">Análise longitudinal do impacto de melhorias em infraestrutura sobre o desempenho
@@ -241,6 +183,14 @@
       </div>
 
     </div>
+  </section>
+
+  <section class="section">
+  <div class="section-title">Grafos de Correlação</div>
+  <div class="section-sub">Relação entre municípios, faixas de SARESP e taxa de ausência docente</div>
+  <div class="card" style="padding:24px;">
+    <img src="/api/grafo" alt="Grafo de correlações" style="width:100%;border-radius:8px;" />
+  </div>
   </section>
 
   <div class="separator"></div>
@@ -257,44 +207,35 @@
         <div class="sidebar-section-label">Municípios da RMC</div>
 
         <label class="checkbox-item">
-          <input type="checkbox" checked />
+          <input type="checkbox" value="Campinas" checked />
           <span class="checkbox-label" style="color:var(--accent);font-weight:500">Campinas</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Hortolândia" />
           <span class="checkbox-label">Hortolândia</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Sumaré" />
           <span class="checkbox-label">Sumaré</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Indaiatuba" />
           <span class="checkbox-label">Indaiatuba</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Paulínia" />
           <span class="checkbox-label">Paulínia</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Americana" />
           <span class="checkbox-label">Americana</span>
         </label>
         <label class="checkbox-item">
-          <input type="checkbox" />
+          <input type="checkbox" value="Valinhos" />
           <span class="checkbox-label">Valinhos</span>
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" />
-          <span class="checkbox-label">Vinhedo</span>
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" />
-          <span class="checkbox-label">Itatiba</span>
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" />
-          <span class="checkbox-label">Sto. Antônio de Posse</span>
+        </label>        <label class="checkbox-item">
+          <input type="checkbox" value="Santa Bárbara D'Oeste" />
+          <span class="checkbox-label">Santa Bárbara D'Oeste</span>
         </label>
 
         <div class="sidebar-divider"></div>
@@ -302,19 +243,19 @@
         <div class="sidebar-section-label">Tipo de gráfico</div>
 
         <label class="radio-item">
-          <input type="radio" name="chart-type" checked />
+          <input type="radio" name="chart-type" checked value="bar" />
           <span class="checkbox-label" style="color:var(--accent);font-weight:500">Barras</span>
         </label>
         <label class="radio-item">
-          <input type="radio" name="chart-type" />
+          <input type="radio" name="chart-type" value="scatter" />
           <span class="checkbox-label">Dispersão</span>
         </label>
         <label class="radio-item">
-          <input type="radio" name="chart-type" />
+          <input type="radio" name="chart-type" value="line" />
           <span class="checkbox-label">Linhas</span>
         </label>
         <label class="radio-item">
-          <input type="radio" name="chart-type" />
+          <input type="radio" name="chart-type" value="radar" />
           <span class="checkbox-label">Radar</span>
         </label>
       </div>
@@ -326,35 +267,12 @@
           <a class="chart-main-link" href="#">Gráfico em tela cheia ↗</a>
         </div>
 
-        <div class="chart-main-body">
-          <div class="main-bars">
-            <div class="main-bar-group">
-              <div class="main-bar-item mbi-a h60"></div>
-              <div class="main-bar-item mbi-b h45"></div>
-            </div>
-            <div class="main-bar-group">
-              <div class="main-bar-item mbi-a h80"></div>
-              <div class="main-bar-item mbi-b h65"></div>
-            </div>
-            <div class="main-bar-group">
-              <div class="main-bar-item mbi-a h50"></div>
-              <div class="main-bar-item mbi-b h40"></div>
-            </div>
-            <div class="main-bar-group">
-              <div class="main-bar-item mbi-a h90"></div>
-              <div class="main-bar-item mbi-b h75"></div>
-            </div>
-            <div class="main-bar-group">
-              <div class="main-bar-item mbi-a h70"></div>
-              <div class="main-bar-item mbi-b h55"></div>
-            </div>
-            <div class="main-bar-group">
-              <div class="main-bar-item mbi-a h35"></div>
-              <div class="main-bar-item mbi-b h30"></div>
-            </div>
-          </div>
-          <div class="chart-main-label">Barras agrupadas — Municípios selecionados</div>
-          <div class="chart-main-sub">eixo x: Município · eixo y: Indicador selecionado</div>
+        <div class="chart-main-body chart-wrapper" data-filter-chart="true">
+          <div class="chart-loading">Carregando gráfico...</div>
+          <canvas id="chart-main"></canvas>
+          <div class="chart-error" hidden></div>
+          <div class="chart-main-label" id="chart-main-label">Ranking Geral dos Municípios</div>
+          <div class="chart-main-sub" id="chart-main-sub">eixo x: Índice Educação · eixo y: Município</div>
         </div>
 
         <div class="insight-box">
@@ -435,7 +353,9 @@
 
   <!-- ── SCRIPT DO CHATBOT GEMINI ── -->
   <!-- Chatbot Gemini -->
+  <script src="{{ url_for('static', filename='js/chart_loader.js') }}"></script>
   <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
 
 </body>
 </html>
+
