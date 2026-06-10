@@ -1208,3 +1208,12 @@ footer {
   flex: initial;
   min-height: 0;
 }
+
+.chart-error[hidden] {
+  display: none !important;
+  pointer-events: none;
+}
+
+.chart-wrapper.is-loaded .chart-error {
+  pointer-events: none;
+}

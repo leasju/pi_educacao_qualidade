@@ -1,6 +1,12 @@
+import io
 import os
+import textwrap
 import requests
-from flask import Flask, jsonify, render_template, request
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import networkx as nx
+from flask import Flask, jsonify, render_template, request, Response
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
@@ -402,6 +408,205 @@ def chart_data():
     except Exception as exc:
         print(f"[CHART DATA ERROR] {exc}")
         return jsonify({"error": "Erro ao carregar dados dos graficos"}), 500
+    finally:
+        client.close()
+
+
+# ROTA DO GRAFO BIPARTIDO
+@app.route("/api/grafo")
+def grafo():
+    """Gera grafo bipartido (SARESP x município / taxa ausência x município) como PNG."""
+    try:
+        client = get_mongo_client()
+    except RuntimeError as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    db = client["datasets"]
+
+    try:
+        def clean_number(value):
+            if value is None:
+                return None
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return None
+
+        # ── Docentes totais por município ────────────────────────────────
+        pipeline_docentes = [{
+            "$group": {
+                "_id": "$MUNICÍPIOS",
+                "total_docentes": {
+                    "$sum": {
+                        "$convert": {
+                            "input": "$QTDE DOCENTES FUNDAMENTAL - TOTAL",
+                            "to": "double",
+                            "onError": 0,
+                            "onNull": 0,
+                        }
+                    }
+                },
+            }
+        }]
+        dados_docentes = {
+            item["_id"]: item["total_docentes"]
+            for item in db["censo"].aggregate(pipeline_docentes)
+            if item["_id"]
+        }
+
+        # ── Total de dias ausentes por município ─────────────────────────
+        pipeline_ausencia = [{
+            "$group": {
+                "_id": "$MUNICÍPIOS",
+                "total_ausencia": {
+                    "$sum": {
+                        "$convert": {
+                            "input": "$TOTAL DIAS AUSENTES",
+                            "to": "double",
+                            "onError": 0,
+                            "onNull": 0,
+                        }
+                    }
+                },
+            }
+        }]
+        dados_ausencia = {
+            item["_id"]: item["total_ausencia"]
+            for item in db["ausencia"].aggregate(pipeline_ausencia)
+            if item["_id"]
+        }
+
+        # ── Média SARESP por município ───────────────────────────────────
+        pipeline_saresp = [{
+            "$group": {
+                "_id": "$MUNICÍPIOS",
+                "media_saresp": {
+                    "$avg": {
+                        "$convert": {
+                            "input": "$MÉDIA_PROFICIÊNCIA",
+                            "to": "double",
+                            "onError": None,
+                            "onNull": None,
+                        }
+                    }
+                },
+            }
+        }]
+        dados_saresp = {
+            item["_id"]: clean_number(item.get("media_saresp"))
+            for item in db["saresp"].aggregate(pipeline_saresp)
+            if item["_id"]
+        }
+
+        # ── Municípios com todos os dados disponíveis ────────────────────
+        municipios = sorted(
+            set(dados_docentes) & set(dados_ausencia) & set(dados_saresp)
+        )
+
+        if not municipios:
+            return jsonify({"error": "Dados insuficientes para gerar o grafo"}), 500
+
+        # ── Calcula taxa de ausência e classifica em faixas ──────────────
+        def faixa_saresp(media):
+            if media is None:
+                return "Sem dados"
+            if media < 200:
+                return "<200"
+            if media < 205:
+                return "200-205"
+            if media < 215:
+                return "205-215"
+            if media < 220:
+                return "215-220"
+            return "≥220"
+
+        def faixa_ausencia(taxa):
+            if taxa is None:
+                return "Sem dados"
+            if taxa < 0.5:
+                return "<0,5"
+            if taxa < 0.7:
+                return "0,5-0,7"
+            if taxa < 0.9:
+                return "0,7-0,9"
+            if taxa < 1.1:
+                return "0,9-1,1"
+            return "≥1,1"
+
+        edges_saresp = []
+        edges_ausencia = []
+        for municipio in municipios:
+            docentes = dados_docentes.get(municipio, 0)
+            ausencia = dados_ausencia.get(municipio, 0)
+            taxa = (ausencia / docentes) if docentes and docentes > 0 else None
+            saresp = dados_saresp.get(municipio)
+            edges_saresp.append((municipio, faixa_saresp(saresp)))
+            edges_ausencia.append((municipio, faixa_ausencia(taxa)))
+
+        faixas_saresp = ["<200", "200-205", "205-215", "215-220", "≥220"]
+        faixas_ausencia = ["<0,5", "0,5-0,7", "0,7-0,9", "0,9-1,1", "≥1,1"]
+
+        # ── Monta os dois grafos bipartidos ──────────────────────────────
+        G = nx.Graph()
+        G.add_nodes_from(municipios, bipartite=0)
+        G.add_nodes_from(faixas_saresp, bipartite=1)
+        G.add_edges_from(edges_saresp)
+
+        H = nx.Graph()
+        H.add_nodes_from(municipios, bipartite=0)
+        H.add_nodes_from(faixas_ausencia, bipartite=1)
+        H.add_edges_from(edges_ausencia)
+
+        # ── Desenha ──────────────────────────────────────────────────────
+        wrapped_G = {n: "\n".join(textwrap.wrap(n, width=12)) for n in G.nodes()}
+        wrapped_H = {n: "\n".join(textwrap.wrap(n, width=12)) for n in H.nodes()}
+
+        pos_G = nx.bipartite_layout(G, municipios)
+        pos_H = nx.bipartite_layout(H, municipios)
+
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 10))
+        fig.patch.set_facecolor("#161616")
+        for ax in (ax1, ax2):
+            ax.set_facecolor("#161616")
+
+        # Grafo G — SARESP
+        mun_nodes_G = [n for n in G.nodes() if n in municipios]
+        faixa_nodes_G = [n for n in G.nodes() if n in faixas_saresp]
+        nx.draw_networkx_nodes(G, pos_G, nodelist=mun_nodes_G, node_color="#74BCFF", node_size=2800, ax=ax1)
+        nx.draw_networkx_nodes(G, pos_G, nodelist=faixa_nodes_G, node_color="#f5a623", node_size=2200, ax=ax1)
+        nx.draw_networkx_labels(G, pos_G, labels=wrapped_G, font_size=7, font_color="#0f0f0f", font_weight="bold", ax=ax1)
+        nx.draw_networkx_edges(G, pos_G, ax=ax1, edge_color="#e8e8e8", alpha=0.6, arrows=False)
+        ax1.set_title("Municípios × Faixa de SARESP", color="#e8e8e8", fontsize=13, pad=14)
+        ax1.axis("off")
+
+        # Grafo H — Taxa de ausência
+        mun_nodes_H = [n for n in H.nodes() if n in municipios]
+        faixa_nodes_H = [n for n in H.nodes() if n in faixas_ausencia]
+        nx.draw_networkx_nodes(H, pos_H, nodelist=mun_nodes_H, node_color="#74BCFF", node_size=2800, ax=ax2)
+        nx.draw_networkx_nodes(H, pos_H, nodelist=faixa_nodes_H, node_color="#FF6B6B", node_size=2200, ax=ax2)
+        nx.draw_networkx_labels(H, pos_H, labels=wrapped_H, font_size=7, font_color="#0f0f0f", font_weight="bold", ax=ax2)
+        nx.draw_networkx_edges(H, pos_H, ax=ax2, edge_color="#e8e8e8", alpha=0.6, arrows=False)
+        ax2.set_title("Municípios × Taxa de Ausência Docente", color="#e8e8e8", fontsize=13, pad=14)
+        ax2.axis("off")
+
+        fig.suptitle(
+            "Correlações entre Notas do SARESP e Taxa de Ausência Docente",
+            fontsize=15, fontweight="bold", color="#e8e8e8", y=1.01,
+        )
+        plt.tight_layout()
+
+        # ── Serializa para PNG em memória e retorna ──────────────────────
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png", dpi=130, bbox_inches="tight",
+                    facecolor=fig.get_facecolor())
+        plt.close(fig)
+        buf.seek(0)
+
+        return Response(buf.getvalue(), mimetype="image/png")
+
+    except Exception as exc:
+        print(f"[GRAFO ERROR] {exc}")
+        return jsonify({"error": "Erro ao gerar grafo"}), 500
     finally:
         client.close()
 

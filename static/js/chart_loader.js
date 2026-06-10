@@ -147,7 +147,11 @@ function scatterConfig(chartData) {
     align: 'top',
     anchor: 'end',
     offset: 4,
-    formatter: value => value.label,
+    formatter: (value, context) => {
+      // linha de tendência não tem label, oculta
+      if (context.datasetIndex !== 0) return null;
+      return value.label ?? '';
+    },
     color: colorPalette.textColor,
     font: { size: 9, weight: '600' }
   };
@@ -284,6 +288,8 @@ function createChartConfig(chartKey, chartData) {
 
 function setError(wrapper, message) {
   wrapper.classList.add('has-error');
+  const loading = wrapper.querySelector('.chart-loading');
+  if (loading) loading.hidden = true;          // ← linha nova
   const errorElement = wrapper.querySelector('.chart-error');
   if (errorElement) {
     errorElement.textContent = message;
@@ -412,6 +418,11 @@ async function renderCharts() {
 
       mountChart(canvas, createChartConfig(chartKey, chartData));
       wrapper.classList.add('is-loaded');
+      const errorEl = wrapper.querySelector('.chart-error');
+      if (errorEl) {
+        errorEl.hidden = true;        // ← garante que fica oculta
+        errorEl.style.pointerEvents = 'none';  // ← não bloqueia o mouse
+      }
     });
 
     renderFilteredChart();
