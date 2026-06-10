@@ -1,6 +1,8 @@
 import io
+import json
 import os
 import textwrap
+import threading
 import requests
 import matplotlib
 matplotlib.use('Agg')
@@ -9,10 +11,12 @@ import networkx as nx
 from flask import Flask, jsonify, render_template, request, Response
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from sklearn.model_selection import train_test_split
 
 load_dotenv()
 
 app = Flask(__name__, template_folder="Template")
+graph_render_lock = threading.Lock()
 
 
 def get_mongo_client():
@@ -23,35 +27,72 @@ def get_mongo_client():
 
 
 # CONTEXTO DO BANCO
+CHAT_SAMPLE_SIZE = 24
+CHAT_PROJECTIONS = {
+    "saresp": {
+        "_id": 0, "MUNICÍPIOS": 1, "ANO": 1, "MÉDIA_PROFICIÊNCIA": 1,
+    },
+    "fluxo": {
+        "_id": 0, "MUNICÍPIOS": 1, "ANO": 1,
+        "APROVAÇÃO ANOS INICIAIS 9 ANOS": 1,
+        "APROVAÇÃO ANOS FINAIS 9 ANOS": 1,
+        "REPROVAÇÃO ANOS INICIAIS 9 ANOS": 1,
+        "REPROVAÇÃO ANOS FINAIS 9 ANOS": 1,
+    },
+    "ausencia": {
+        "_id": 0, "MUNICÍPIOS": 1, "ANO": 1, "TOTAL DIAS AUSENTES": 1,
+    },
+    "censo": {
+        "_id": 0, "MUNICÍPIOS": 1, "ANO": 1, "BIBLIOTECA": 1,
+        "LAB. INFORMÁTICA": 1, "LAB. CIÊNCIAS": 1, "INTERNET": 1,
+        "INTERNET - ALUNOS": 1, "INTERNET - BANDA LARGA": 1,
+    },
+}
+
+
+def get_stratified_db_sample(db, sample_size=CHAT_SAMPLE_SIZE):
+    """Seleciona uma amostra proporcional por dataset para reduzir o prompt."""
+    records = []
+    for dataset_name, projection in CHAT_PROJECTIONS.items():
+        for record in db[dataset_name].find({}, projection):
+            record["_dataset"] = dataset_name
+            records.append(record)
+
+    if len(records) <= sample_size:
+        return records
+
+    strata = [record["_dataset"] for record in records]
+    classes = len(set(strata))
+    test_size = len(records) - sample_size
+
+    if sample_size >= classes and test_size >= classes:
+        sample, _ = train_test_split(
+            records,
+            train_size=sample_size,
+            random_state=42,
+            stratify=strata,
+        )
+        return sample
+
+    return records[:sample_size]
+
+
 def get_db_context():
     try:
         client = get_mongo_client()
         db = client["datasets"]
 
-        context = "=== DADOS EDUCACIONAIS RMC ===\n\n"
-
         saresp = db["saresp"]
         municipios = saresp.distinct("MUNICÍPIOS")
         anos = sorted(saresp.distinct("ANO"))
-        sample = list(saresp.find({}, {"_id": 0}).limit(3))
-        context += (
-            "SARESP (proficiência por município):\n"
-            f"- Municípios: {', '.join(str(m) for m in municipios[:15])}\n"
-            f"- Anos disponíveis: {anos}\n"
-            f"- Exemplo de registros: {sample}\n\n"
+        sample = get_stratified_db_sample(db)
+        context = (
+            "=== DADOS EDUCACIONAIS RMC ===\n"
+            f"Municípios disponíveis: {', '.join(str(m) for m in municipios)}\n"
+            f"Anos disponíveis: {anos}\n"
+            f"Amostra estratificada proporcional por dataset ({len(sample)} registros):\n"
+            f"{json.dumps(sample, ensure_ascii=False, default=str, separators=(',', ':'))}"
         )
-
-        fluxo = db["fluxo"]
-        sample = list(fluxo.find({}, {"_id": 0}).limit(3))
-        context += f"FLUXO ESCOLAR (aprovação/reprovação/abandono):\n- Exemplo de registros: {sample}\n\n"
-
-        ausencia = db["ausencia"]
-        sample = list(ausencia.find({}, {"_id": 0}).limit(3))
-        context += f"AUSÊNCIAS DOCENTES (absenteísmo):\n- Exemplo de registros: {sample}\n\n"
-
-        censo = db["censo"]
-        sample = list(censo.find({}, {"_id": 0}).limit(3))
-        context += f"CENSO ESCOLAR (infraestrutura):\n- Exemplo de registros: {sample}\n\n"
 
         client.close()
         return context
@@ -154,6 +195,39 @@ def chart_data():
                 0 if clean_number(value) is None else (clean_number(value) - min_value) / (max_value - min_value)
                 for value in values
             ]
+
+        def correlation(x_values, y_values):
+            pairs = [
+                (clean_number(x), clean_number(y))
+                for x, y in zip(x_values, y_values)
+                if clean_number(x) is not None and clean_number(y) is not None
+            ]
+            if len(pairs) < 2:
+                return 0
+            xs, ys = zip(*pairs)
+            mean_x = sum(xs) / len(xs)
+            mean_y = sum(ys) / len(ys)
+            numerator = sum((x - mean_x) * (y - mean_y) for x, y in pairs)
+            denominator_x = sum((x - mean_x) ** 2 for x in xs) ** 0.5
+            denominator_y = sum((y - mean_y) ** 2 for y in ys) ** 0.5
+            denominator = denominator_x * denominator_y
+            return numerator / denominator if denominator else 0
+
+        def correlation_analysis(points, x_name, y_name):
+            if not points:
+                return "Não há observações suficientes para produzir uma análise descritiva."
+            coefficient = correlation(
+                [item["x"] for item in points],
+                [item["y"] for item in points],
+            )
+            strength = "forte" if abs(coefficient) >= 0.7 else "moderada" if abs(coefficient) >= 0.4 else "fraca"
+            direction = "positiva" if coefficient > 0.05 else "negativa" if coefficient < -0.05 else "praticamente nula"
+            top = max(points, key=lambda item: item["y"])
+            return (
+                f"Entre {len(points)} municípios, a associação entre {x_name} e {y_name} é "
+                f"{strength} e {direction} (r={coefficient:.2f}). "
+                f"{top['label']} apresenta o maior valor de {y_name} ({top['y']:.2f})."
+            )
 
         pipeline_censo_infra = [{
             "$group": {
@@ -345,6 +419,21 @@ def chart_data():
             )
             ranking.append({"MUNICIPIO": item["MUNICIPIO"], "Índice Educação": indice})
         ranking.sort(key=lambda item: item["Índice Educação"], reverse=True)
+        professor_corr = correlation(aluno_professor, aprovacao_professor)
+        professor_direction = "positiva" if professor_corr > 0.05 else "negativa" if professor_corr < -0.05 else "praticamente nula"
+        temporal_changes = []
+        temporal_series = [
+            ("SARESP", saresp_values),
+            ("aprovação", aprovacao_values),
+            ("infraestrutura", infraestrutura_values),
+            ("ausência docente", ausencia_values),
+        ]
+        for label, values in temporal_series:
+            if len(values) >= 2 and values[0] is not None and values[-1] is not None:
+                trend = "aumentou" if values[-1] > values[0] else "diminuiu" if values[-1] < values[0] else "permaneceu estável"
+                temporal_changes.append(f"{label} {trend}")
+        temporal_summary = ", ".join(temporal_changes) or "não houve séries suficientes para comparar o início e o fim"
+        ranking_top = ", ".join(item["MUNICIPIO"] for item in ranking[:3])
 
         return jsonify({
             "infraestrutura_saresp": {
@@ -353,6 +442,7 @@ def chart_data():
                 "xLabel": "Índice de Infraestrutura",
                 "yLabel": "Média SARESP",
                 "data": analise_um,
+                "analysis": correlation_analysis(analise_um, "infraestrutura", "proficiência no SARESP"),
             },
             "ausencia_reprovacao": {
                 "type": "scatter",
@@ -360,6 +450,7 @@ def chart_data():
                 "xLabel": "Total de Dias Ausentes",
                 "yLabel": "Taxa de Reprovação",
                 "data": analise_dois,
+                "analysis": correlation_analysis(analise_dois, "ausência docente", "reprovação"),
             },
             "tecnologia_saresp": {
                 "type": "scatter",
@@ -367,6 +458,7 @@ def chart_data():
                 "xLabel": "Índice Tecnológico",
                 "yLabel": "Média SARESP",
                 "data": analise_tres,
+                "analysis": correlation_analysis(analise_tres, "tecnologia escolar", "proficiência no SARESP"),
             },
             "aluno_professor_aprovacao": {
                 "type": "bar",
@@ -376,6 +468,11 @@ def chart_data():
                     {"label": "Aluno/Professor", "data": min_max(aluno_professor)},
                     {"label": "Aprovação", "data": min_max(aprovacao_professor)},
                 ],
+                "analysis": (
+                    f"A relação entre alunos por professor e aprovação é {professor_direction} "
+                    f"(r={professor_corr:.2f}) nos {len(prof_labels)} municípios comparados. "
+                    "Os valores foram normalizados para permitir a leitura conjunta das duas escalas."
+                ),
             },
             "evolucao_temporal": {
                 "type": "line",
@@ -387,6 +484,11 @@ def chart_data():
                     {"label": "Infraestrutura", "data": min_max(infraestrutura_values)},
                     {"label": "Ausência Docente", "data": min_max(ausencia_values)},
                 ],
+                "analysis": (
+                    f"No período de {anos[0]} a {anos[-1]}, {temporal_summary}. "
+                    "As séries estão normalizadas entre 0 e 1 para destacar suas variações relativas."
+                    if anos else "Não há anos em comum suficientes para produzir uma análise temporal."
+                ),
             },
             "municipio_filtro": {
                 "type": "filtered",
@@ -403,6 +505,11 @@ def chart_data():
                 "title": "Ranking Geral dos Municípios",
                 "labels": [item["MUNICIPIO"] for item in ranking],
                 "datasets": [{"label": "Índice Educação", "data": [item["Índice Educação"] for item in ranking]}],
+                "analysis": (
+                    f"O índice combina SARESP (40%), aprovação (30%), infraestrutura (20%) e menor ausência docente (10%). "
+                    f"Os três municípios mais bem posicionados são {ranking_top}."
+                    if ranking else "Não há dados completos suficientes para calcular o ranking municipal."
+                ),
             },
         }), 200
     except Exception as exc:
@@ -412,10 +519,12 @@ def chart_data():
         client.close()
 
 
-# ROTA DO GRAFO BIPARTIDO
-@app.route("/api/grafo")
-def grafo():
-    """Gera grafo bipartido (SARESP x município / taxa ausência x município) como PNG."""
+# ROTA DOS GRAFOS BIPARTIDOS
+@app.route("/api/grafo/<tipo>")
+def grafo(tipo):
+    """Gera separadamente o grafo de SARESP ou de ausência docente."""
+    if tipo not in {"saresp", "ausencia"}:
+        return jsonify({"error": "Tipo de grafo inválido"}), 404
     try:
         client = get_mongo_client()
     except RuntimeError as exc:
@@ -546,61 +655,60 @@ def grafo():
         faixas_saresp = ["<200", "200-205", "205-215", "215-220", "≥220"]
         faixas_ausencia = ["<0,5", "0,5-0,7", "0,7-0,9", "0,9-1,1", "≥1,1"]
 
-        # ── Monta os dois grafos bipartidos ──────────────────────────────
-        G = nx.Graph()
-        G.add_nodes_from(municipios, bipartite=0)
-        G.add_nodes_from(faixas_saresp, bipartite=1)
-        G.add_edges_from(edges_saresp)
+        if tipo == "saresp":
+            faixas = faixas_saresp
+            edges = edges_saresp
+            title = "Municípios × Faixa de SARESP"
+            range_color = "#f5a623"
+        else:
+            faixas = faixas_ausencia
+            edges = edges_ausencia
+            title = "Municípios × Taxa de Ausência Docente"
+            range_color = "#FF6B6B"
 
-        H = nx.Graph()
-        H.add_nodes_from(municipios, bipartite=0)
-        H.add_nodes_from(faixas_ausencia, bipartite=1)
-        H.add_edges_from(edges_ausencia)
+        graph = nx.Graph()
+        graph.add_nodes_from(municipios, bipartite=0)
+        graph.add_nodes_from(faixas, bipartite=1)
+        graph.add_edges_from(edges)
+        labels = {
+            node: "\n".join(textwrap.wrap(node, width=12))
+            for node in graph.nodes()
+        }
+        positions = nx.bipartite_layout(graph, municipios)
 
-        # ── Desenha ──────────────────────────────────────────────────────
-        wrapped_G = {n: "\n".join(textwrap.wrap(n, width=12)) for n in G.nodes()}
-        wrapped_H = {n: "\n".join(textwrap.wrap(n, width=12)) for n in H.nodes()}
+        # Matplotlib usa estado global; o lock evita conflito entre as duas imagens.
+        with graph_render_lock:
+            fig, axis = plt.subplots(figsize=(9, 8))
+            fig.patch.set_facecolor("#161616")
+            axis.set_facecolor("#161616")
 
-        pos_G = nx.bipartite_layout(G, municipios)
-        pos_H = nx.bipartite_layout(H, municipios)
+            nx.draw_networkx_nodes(
+                graph, positions, nodelist=municipios,
+                node_color="#74BCFF", node_size=3000, ax=axis,
+            )
+            nx.draw_networkx_nodes(
+                graph, positions, nodelist=faixas,
+                node_color=range_color, node_size=2400, ax=axis,
+            )
+            nx.draw_networkx_labels(
+                graph, positions, labels=labels, font_size=10,
+                font_color="#0f0f0f", font_weight="bold", ax=axis,
+            )
+            nx.draw_networkx_edges(
+                graph, positions, edge_color="#e8e8e8",
+                alpha=0.6, ax=axis,
+            )
+            axis.set_title(title, color="#e8e8e8", fontsize=15, pad=18)
+            axis.axis("off")
+            plt.tight_layout()
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 10))
-        fig.patch.set_facecolor("#161616")
-        for ax in (ax1, ax2):
-            ax.set_facecolor("#161616")
-
-        # Grafo G — SARESP
-        mun_nodes_G = [n for n in G.nodes() if n in municipios]
-        faixa_nodes_G = [n for n in G.nodes() if n in faixas_saresp]
-        nx.draw_networkx_nodes(G, pos_G, nodelist=mun_nodes_G, node_color="#74BCFF", node_size=2800, ax=ax1)
-        nx.draw_networkx_nodes(G, pos_G, nodelist=faixa_nodes_G, node_color="#f5a623", node_size=2200, ax=ax1)
-        nx.draw_networkx_labels(G, pos_G, labels=wrapped_G, font_size=7, font_color="#0f0f0f", font_weight="bold", ax=ax1)
-        nx.draw_networkx_edges(G, pos_G, ax=ax1, edge_color="#e8e8e8", alpha=0.6, arrows=False)
-        ax1.set_title("Municípios × Faixa de SARESP", color="#e8e8e8", fontsize=13, pad=14)
-        ax1.axis("off")
-
-        # Grafo H — Taxa de ausência
-        mun_nodes_H = [n for n in H.nodes() if n in municipios]
-        faixa_nodes_H = [n for n in H.nodes() if n in faixas_ausencia]
-        nx.draw_networkx_nodes(H, pos_H, nodelist=mun_nodes_H, node_color="#74BCFF", node_size=2800, ax=ax2)
-        nx.draw_networkx_nodes(H, pos_H, nodelist=faixa_nodes_H, node_color="#FF6B6B", node_size=2200, ax=ax2)
-        nx.draw_networkx_labels(H, pos_H, labels=wrapped_H, font_size=7, font_color="#0f0f0f", font_weight="bold", ax=ax2)
-        nx.draw_networkx_edges(H, pos_H, ax=ax2, edge_color="#e8e8e8", alpha=0.6, arrows=False)
-        ax2.set_title("Municípios × Taxa de Ausência Docente", color="#e8e8e8", fontsize=13, pad=14)
-        ax2.axis("off")
-
-        fig.suptitle(
-            "Correlações entre Notas do SARESP e Taxa de Ausência Docente",
-            fontsize=15, fontweight="bold", color="#e8e8e8", y=1.01,
-        )
-        plt.tight_layout()
-
-        # ── Serializa para PNG em memória e retorna ──────────────────────
-        buf = io.BytesIO()
-        plt.savefig(buf, format="png", dpi=130, bbox_inches="tight",
-                    facecolor=fig.get_facecolor())
-        plt.close(fig)
-        buf.seek(0)
+            buf = io.BytesIO()
+            fig.savefig(
+                buf, format="png", dpi=130, bbox_inches="tight",
+                facecolor=fig.get_facecolor(),
+            )
+            plt.close(fig)
+            buf.seek(0)
 
         return Response(buf.getvalue(), mimetype="image/png")
 

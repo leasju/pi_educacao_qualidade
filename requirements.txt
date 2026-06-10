@@ -12,3 +12,4 @@ gunicorn
 google-generativeai
 google-genai
 requests
+scikit-learn

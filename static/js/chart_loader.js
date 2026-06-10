@@ -418,6 +418,8 @@ async function renderCharts() {
 
       mountChart(canvas, createChartConfig(chartKey, chartData));
       wrapper.classList.add('is-loaded');
+      const analysis = wrapper.closest('.card')?.querySelector('.card-desc');
+      if (analysis && chartData.analysis) analysis.textContent = chartData.analysis;
       const errorEl = wrapper.querySelector('.chart-error');
       if (errorEl) {
         errorEl.hidden = true;        // ← garante que fica oculta

@@ -17,19 +17,14 @@
 
   <!-- ── NAV ── -->
   <nav>
-    <a class="logo" href="#">
-      <div class="logo-icon">
-        <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="10" width="3" height="5" />
-          <rect x="6" y="6" width="3" height="9" />
-          <rect x="11" y="2" width="3" height="13" />
-        </svg>
-      </div>
-      edu<span style="color:var(--accent)">stats</span>
+    <a class="logo" href="#inicio" aria-label="EduStats - início">
+      <img src="{{ url_for('static', filename='edustats-logo-figma 1.png') }}" alt="EduStats" />
     </a>
 
-    <ul class="nav-links">
-      <li><a href="#" class="active">Início</a></li>
+    <button class="nav-toggle" type="button" aria-label="Abrir menu" aria-expanded="false"
+      aria-controls="nav-links">☰</button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#inicio" class="active">Início</a></li>
       <li><a href="#analise">Análise</a></li>
       <li><a href="#grafos">Grafos</a></li>
       <li><a href="#sobre">Sobre</a></li>
@@ -67,8 +62,8 @@
       <!-- Card 1: Proficiência SARESP -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Proficiência SARESP por Município</span>
-          <span class="card-badge badge-grouped">Barras Agrupadas</span>
+          <span class="card-title">Infraestrutura Escolar × Média SARESP</span>
+          <span class="card-badge badge-available">Dispersão</span>
         </div>
         <div class="card-chart chart-wrapper" data-chart-key="infraestrutura_saresp">
           <div class="chart-loading">Carregando gráfico...</div>
@@ -76,16 +71,15 @@
           <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
-          <div class="card-desc">Análise comparativa de proficiência por município e disciplina ao longo dos anos do
-            SARESP. Identifica padrões e variações regionais significativas.</div>
+          <div class="card-desc">Calculando análise descritiva...</div>
         </div>
       </div>
 
       <!-- Card 2: Proficiência × Absenteísmo -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Proficiência × Absenteísmo Docente</span>
-          <span class="card-badge badge-available">Disponível</span>
+          <span class="card-title">Ausência Docente × Reprovação</span>
+          <span class="card-badge badge-available">Dispersão</span>
         </div>
         <div class="card-chart chart-wrapper" data-chart-key="ausencia_reprovacao">
           <div class="chart-loading">Carregando gráfico...</div>
@@ -93,16 +87,15 @@
           <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
-          <div class="card-desc">Correlação entre taxas de absenteísmo de professores e desempenho dos alunos por escola
-            e município, evidenciando impactos no aprendizado.</div>
+          <div class="card-desc">Calculando análise descritiva...</div>
         </div>
       </div>
 
       <!-- Card 3: Aprovação e Reprovação -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Taxa de Aprovação e Reprovação</span>
-          <span class="card-badge badge-grouped">Barras empilhadas</span>
+          <span class="card-title">Alunos por Professor × Aprovação</span>
+          <span class="card-badge badge-grouped">Barras</span>
         </div>
         <div class="card-chart chart-wrapper" data-chart-key="aluno_professor_aprovacao">
           <div class="chart-loading">Carregando gráfico...</div>
@@ -110,16 +103,15 @@
           <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
-          <div class="card-desc">Distribuição proporcional de aprovação, reprovação e abandono escolar por série e
-            município. Revela tendências temporais no fluxo escolar da RMC.</div>
+          <div class="card-desc">Calculando análise descritiva...</div>
         </div>
       </div>
 
       <!-- Card 4: Fluxo × Infraestrutura -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Fluxo Escolar × Infraestrutura</span>
-          <span class="card-badge badge-available">Disponível</span>
+          <span class="card-title">Tecnologia Escolar × Média SARESP</span>
+          <span class="card-badge badge-available">Dispersão</span>
         </div>
         <div class="card-chart chart-wrapper" data-chart-key="tecnologia_saresp">
           <div class="chart-loading">Carregando gráfico...</div>
@@ -127,15 +119,14 @@
           <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
-          <div class="card-desc">Relação entre qualidade da infraestrutura física das escolas e indicadores de fluxo
-            escolar, como aprovação e evasão, nos municípios da RMC.</div>
+          <div class="card-desc">Calculando análise descritiva...</div>
         </div>
       </div>
 
       <!-- Card 5: Ausências por Mês -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Ausências de Servidores por Mês</span>
+          <span class="card-title">Evolução Temporal dos Indicadores</span>
           <span class="card-badge badge-lines">Linhas</span>
         </div>
         <div class="card-chart chart-wrapper" data-chart-key="evolucao_temporal">
@@ -144,16 +135,15 @@
           <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
-          <div class="card-desc">Evolução mensal das ausências de servidores por categoria funcional e município.
-            Permite identificar sazonalidades e anomalias no quadro docente.</div>
+          <div class="card-desc">Calculando análise descritiva...</div>
         </div>
       </div>
 
       <!-- Card 6: Infraestrutura × Desempenho -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Infraestrutura Escolar × Desempenho</span>
-          <span class="card-badge badge-lines">Linhas</span>
+          <span class="card-title">Ranking Geral dos Municípios</span>
+          <span class="card-badge badge-grouped">Barras</span>
         </div>
         <div class="card-chart chart-wrapper" data-chart-key="ranking_municipios">
           <div class="chart-loading">Carregando gráfico...</div>
@@ -161,8 +151,7 @@
           <div class="chart-error" hidden></div>
         </div>
         <div class="card-footer">
-          <div class="card-desc">Análise longitudinal do impacto de melhorias em infraestrutura sobre o desempenho
-            escolar, cruzando investimentos e resultados do SARESP por período.</div>
+          <div class="card-desc">Calculando análise descritiva...</div>
         </div>
       </div>
 
@@ -172,18 +161,23 @@
   <div class="filters-bar">
   </div>
 
-  <section class="section">
+  <section class="section" id="grafos">
   <div class="section-title">Grafos de Correlação</div>
   <div class="section-sub">Relação entre municípios, faixas de SARESP e taxa de ausência docente</div>
-  <div class="card" style="padding:24px;">
-    <img src="/api/grafo" alt="Grafo de correlações" style="width:100%;border-radius:8px;" />
+  <div class="graph-grid">
+    <div class="card graph-card">
+      <img src="/api/grafo/saresp" alt="Grafo de municípios por faixa de SARESP" />
+    </div>
+    <div class="card graph-card">
+      <img src="/api/grafo/ausencia" alt="Grafo de municípios por taxa de ausência docente" />
+    </div>
   </div>
   </section>
 
   <div class="separator"></div>
 
   <!-- ── ANÁLISE POR MUNICÍPIO ── -->
-  <section class="municipality-section" id="grafos">
+  <section class="municipality-section" id="municipios">
     <div class="section-title">Análise com Filtro por Município</div>
     <div class="section-sub">Selecione municípios e tipo de visualização para comparação direta</div>
 
@@ -261,7 +255,8 @@
           <div class="chart-main-label" id="chart-main-label">Ranking Geral dos Municípios</div>
           <div class="chart-main-sub" id="chart-main-sub">eixo x: Índice Educação · eixo y: Município</div>
         </div>
-
+      </div>
+    </div>
   </section>
 
   <!-- ── FOOTER ── -->
@@ -305,6 +300,22 @@
     // Highlight do link ativo na nav ao fazer scroll
     const sections = document.querySelectorAll('section, .hero');
     const links = document.querySelectorAll('.nav-links a');
+    const navToggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+
+    navToggle.addEventListener('click', () => {
+      const isOpen = navLinks.classList.toggle('is-open');
+      navToggle.setAttribute('aria-expanded', String(isOpen));
+      navToggle.textContent = isOpen ? '✕' : '☰';
+    });
+
+    navLinks.addEventListener('click', event => {
+      if (event.target.closest('a')) {
+        navLinks.classList.remove('is-open');
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.textContent = '☰';
+      }
+    });
 
     window.addEventListener('scroll', () => {
       let current = '';

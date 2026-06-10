@@ -4,10 +4,13 @@ Os dados incluem proficiência SARESP, absenteísmo docente, taxa de aprovação
 fluxo escolar e infraestrutura escolar. Responda de forma clara e objetiva em português brasileiro.`;
 
 const chatHistory = [];
+const MAX_HISTORY_MESSAGES = 8;
 
 function toggleChat() {
     const box = document.getElementById("chat-box");
+    const bubble = document.getElementById("chat-bubble");
     box.classList.toggle("open");
+    bubble.classList.toggle("is-chat-open", box.classList.contains("open"));
     if (box.classList.contains("open")) {
         document.getElementById("chat-input").focus();
     }
@@ -40,10 +43,7 @@ async function sendMessage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                messages: [
-                    { role: "system", content: SYSTEM_CTX },
-                    ...chatHistory
-                ]
+                messages: chatHistory.slice(-MAX_HISTORY_MESSAGES)
             })
         });
 
